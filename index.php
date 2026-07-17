@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Refund Calculator PH</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        body, div, span, input, select, button, nav, p, h1 { transition: all 0.3s ease; }
+        :root {
+            --bg-body: #f3f4f6; --bg-nav: #ffffff; --bg-card: #ffffff;
+            --text-main: #1f2937; --text-muted: #6b7280; --accent: #3b82f6; --border: #e5e7eb;
+        }
+        /* Modal Animation */
+        .modal-enter { opacity: 0; transform: scale(0.95); }
+        .modal-enter-active { opacity: 1; transform: scale(1); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .modal-exit { opacity: 1; transform: scale(1); }
+        .modal-exit-active { opacity: 0; transform: scale(0.95); transition: all 0.2s ease-in; }
+    </style>
+</head>
+<body class="bg-[var(--bg-body)] min-h-screen flex flex-col font-sans text-[var(--text-main)]">
+
+    <nav class="w-full bg-[var(--bg-nav)] border-b border-[var(--border)] px-4 py-3 flex justify-between items-center sticky top-0 z-50 shadow-sm">
+        <div class="flex items-center gap-2">
+            <div class="h-8 w-8 bg-[var(--accent)] rounded-lg flex items-center justify-center text-white font-bold shadow-md">
+                <i class="fa-solid fa-server"></i>
+            </div>
+            <span class="font-bold text-lg tracking-tight">Refund<span class="opacity-60">PH</span></span>
+        </div>
+        <div>
+            <select id="themeSelector" class="bg-[var(--bg-body)] text-[var(--text-main)] border border-[var(--border)] text-xs rounded-full px-3 py-1.5 focus:outline-none cursor-pointer font-medium">
+                <option value="modernLight">Modern Light</option>
+                <option value="midnight">Midnight</option>
+                <option value="cyberpunk">Cyberpunk</option>
+                <option value="forest">Forest</option>
+                <option value="sunset">Sunset</option>
+                <option value="lavender">Lavender</option>
+                <option value="monochrome">Monochrome</option>
+                <option value="ocean">Ocean</option>
+                <option value="cherry">Cherry</option>
+                <option value="gold">Luxury Gold</option>
+            </select>
+        </div>
+    </nav>
+
+    <div class="flex-1 flex items-center justify-center p-4">
+        <div class="w-full max-w-sm bg-[var(--bg-card)] rounded-3xl shadow-2xl border border-[var(--border)] overflow-hidden">
+            <div class="p-6 pb-2">
+                <h2 class="text-xl font-bold">Standard Refund Calculator</h2>
+                <p class="text-xs text-[var(--text-muted)]">@Grashiex Service</p>
+            </div>
+
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1">Subscription Price</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-3 text-[var(--text-muted)] font-bold">₱</span>
+                        <input type="number" id="price" placeholder="0.00" class="w-full pl-9 pr-4 py-2.5 rounded-xl bg-[var(--bg-body)] border border-[var(--border)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] text-lg font-bold">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1">Total Subscription Days</label>
+                    <div class="relative">
+                        <input type="number" id="totalDays" placeholder="e.g. 30" class="w-full px-4 py-2.5 rounded-xl bg-[var(--bg-body)] border border-[var(--border)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] text-sm font-semibold">
+                        <span class="absolute right-4 top-3 text-xs text-[var(--text-muted)]">Days</span>
+                    </div>
+                </div>
+                <div class="border-t border-[var(--border)] my-2"></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1">Start Date</label>
+                        <input type="date" id="startDate" class="w-full px-3 py-2.5 rounded-xl bg-[var(--bg-body)] border border-[var(--border)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] text-xs font-medium">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1">End Date (Cancel)</label>
+                        <input type="date" id="endDate" class="w-full px-3 py-2.5 rounded-xl bg-[var(--bg-body)] border border-[var(--border)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] text-xs font-medium">
+                    </div>
+                </div>
+                <div class="pt-2">
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1">Computation Mode</label>
+                    <div class="relative">
+                        <select id="feeMode" class="w-full px-4 py-2.5 rounded-xl bg-[var(--bg-body)] border border-[var(--border)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] text-xs font-bold appearance-none cursor-pointer">
+                            <option value="auto">⚡ Automatic (Based on Days Used)</option>
+                            <option disabled>──────────────</option>
+                            <option value="1.0">No Service Fee (100% Refund)</option>
+                            <option value="0.9">Apply 90% Factor (.9)</option>
+                            <option value="0.8">Apply 80% Factor (.8)</option>
+                            <option value="0.7">Apply 70% Factor (.7)</option>
+                            <option value="0.6">Apply 60% Factor (.6)</option>
+                            <option value="0.5">Apply 50% Factor (.5)</option>
+                        </select>
+                        <div class="absolute right-4 top-3 pointer-events-none text-[var(--text-muted)]">
+                            <i class="fa-solid fa-chevron-down text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="resultCard" class="hidden bg-[var(--accent)] text-white p-6 mx-5 mb-6 rounded-2xl shadow-lg relative overflow-hidden">
+                <div class="absolute -right-4 -top-4 w-24 h-24 bg-white opacity-10 rounded-full blur-xl"></div>
+                <div class="relative z-10">
+                    <p class="text-[10px] opacity-80 uppercase font-bold tracking-widest mb-1">Refund Amount</p>
+                    <h1 class="text-4xl font-bold tracking-tight mb-4" id="refundDisplay">₱0.00</h1>
+                    
+                    <div class="grid grid-cols-3 gap-2 bg-black/20 rounded-lg p-3 text-xs backdrop-blur-sm">
+                        <div class="text-center">
+                            <span class="block opacity-60 text-[9px] uppercase">Daily Rate</span>
+                            <span class="font-bold text-base block mt-1" id="dailyRateDisplay">₱0.00</span>
+                        </div>
+                        <div class="text-center border-l border-white/10">
+                            <span class="block opacity-60 text-[9px] uppercase">Rem. Days</span>
+                            <span class="font-bold text-base block mt-1" id="remainingDisp">0</span>
+                        </div>
+                        <div class="text-center border-l border-white/10">
+                            <span class="block opacity-60 text-[9px] uppercase">Used Days</span>
+                            <span class="font-bold text-base block mt-1" id="usedDisp">0</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-3 pt-3 border-t border-white/20">
+                        <p class="text-[10px] font-bold uppercase opacity-70 mb-1">Computation Rule Applied:</p>
+                        <div class="bg-white/10 rounded px-3 py-2 text-xs italic flex items-start gap-2">
+                            <i class="fa-solid fa-circle-info mt-0.5 opacity-80"></i>
+                            <span id="logicExplanation">Please enter details...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="errorModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm hidden px-4">
+        <div class="bg-[var(--bg-card)] rounded-2xl shadow-2xl max-w-xs w-full p-6 text-center transform transition-all scale-95 opacity-0 border border-[var(--border)]" id="errorModalContent">
+            <div class="w-12 h-12 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-3 text-xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="text-lg font-bold text-[var(--text-main)] mb-1" id="errorTitle">Error</h3>
+            <p class="text-sm text-[var(--text-muted)] mb-3" id="errorMessage">Something went wrong.</p>
+            
+            <div class="bg-[var(--bg-body)] rounded-lg p-3 mb-5 text-left">
+                <p class="text-[10px] font-bold uppercase text-[var(--text-muted)] mb-1">How to fix:</p>
+                <p class="text-xs text-[var(--text-main)] font-medium" id="errorFix">Check your inputs.</p>
+            </div>
+
+            <button onclick="closeErrorModal()" class="w-full bg-[var(--text-main)] text-[var(--bg-card)] font-bold py-3 rounded-xl hover:opacity-90 transition-opacity text-sm">
+                Okay, I'll fix it
+            </button>
+        </div>
+    </div>
+
+    <div id="communityModal" class="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 backdrop-blur-md hidden px-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-xs w-full p-6 text-center transform transition-all scale-95 opacity-0 relative overflow-hidden" id="communityModalContent">
+            
+            <button onclick="dismissCommunity(false)" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+
+            <div class="mb-4">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-50 rounded-full mb-3">
+                    <i class="fa-solid fa-users text-blue-500 text-2xl"></i>
+                </div>
+                <h2 class="text-xl font-bold text-gray-800">Join the Community!</h2>
+                <p class="text-xs text-gray-500 mt-1">Get updates, report bugs, and chat with other users.</p>
+            </div>
+
+            <div class="space-y-3 mb-6">
+                <a href="https://t.me/grashiex" class="flex items-center justify-center gap-3 w-full py-3 rounded-xl bg-[#0088cc] text-white font-bold text-sm shadow-md hover:opacity-90 transition">
+                    <i class="fa-brands fa-telegram text-lg"></i> Join Telegram
+                </a>
+                <a href="https://www.facebook.com/grashiexservices" class="flex items-center justify-center gap-3 w-full py-3 rounded-xl bg-[#1877f2] text-white font-bold text-sm shadow-md hover:opacity-90 transition">
+                    <i class="fa-brands fa-facebook text-lg"></i> Follow Facebook
+                </a>
+            </div>
+
+            <button onclick="dismissCommunity(true)" class="text-xs text-gray-400 font-medium hover:text-gray-600 underline">
+                Don't show this again for 24h
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. THEME LOGIC (WITH SAVE) ---
+        const themes = {
+            modernLight: { '--bg-body': '#f3f4f6', '--bg-nav': '#ffffff', '--bg-card': '#ffffff', '--text-main': '#1f2937', '--text-muted': '#6b7280', '--accent': '#3b82f6', '--border': '#e5e7eb' },
+            midnight:    { '--bg-body': '#0f172a', '--bg-nav': '#1e293b', '--bg-card': '#1e293b', '--text-main': '#f8fafc', '--text-muted': '#94a3b8', '--accent': '#6366f1', '--border': '#334155' },
+            cyberpunk:   { '--bg-body': '#000000', '--bg-nav': '#111111', '--bg-card': '#111111', '--text-main': '#00ffcc', '--text-muted': '#d946ef', '--accent': '#d946ef', '--border': '#333333' },
+            forest:      { '--bg-body': '#1a2e1a', '--bg-nav': '#263c26', '--bg-card': '#263c26', '--text-main': '#e2e8f0', '--text-muted': '#a7f3d0', '--accent': '#22c55e', '--border': '#365336' },
+            sunset:      { '--bg-body': '#fff1f2', '--bg-nav': '#ffffff', '--bg-card': '#ffffff', '--text-main': '#881337', '--text-muted': '#fb7185', '--accent': '#f43f5e', '--border': '#fecdd3' },
+            lavender:    { '--bg-body': '#f5f3ff', '--bg-nav': '#ffffff', '--bg-card': '#ffffff', '--text-main': '#4c1d95', '--text-muted': '#a78bfa', '--accent': '#8b5cf6', '--border': '#ddd6fe' },
+            monochrome:  { '--bg-body': '#171717', '--bg-nav': '#262626', '--bg-card': '#262626', '--text-main': '#ffffff', '--text-muted': '#a3a3a3', '--accent': '#737373', '--border': '#404040' },
+            ocean:       { '--bg-body': '#ecfeff', '--bg-nav': '#ffffff', '--bg-card': '#ffffff', '--text-main': '#164e63', '--text-muted': '#22d3ee', '--accent': '#06b6d4', '--border': '#cffafe' },
+            cherry:      { '--bg-body': '#fdf2f8', '--bg-nav': '#ffffff', '--bg-card': '#ffffff', '--text-main': '#831843', '--text-muted': '#db2777', '--accent': '#be185d', '--border': '#fbcfe8' },
+            gold:        { '--bg-body': '#1c1917', '--bg-nav': '#292524', '--bg-card': '#292524', '--text-main': '#fbbf24', '--text-muted': '#d6d3d1', '--accent': '#d97706', '--border': '#44403c' },
+        };
+
+        const themeSelector = document.getElementById('themeSelector');
+        
+        // Function to apply colors
+        function applyTheme(themeName) {
+            const selected = themes[themeName];
+            if(selected) {
+                for (const [key, value] of Object.entries(selected)) {
+                    document.documentElement.style.setProperty(key, value);
+                }
+                themeSelector.value = themeName; // Keep dropdown in sync
+            }
+        }
+
+        // LOAD SAVED THEME
+        const savedTheme = localStorage.getItem('refundApp_theme');
+        if (savedTheme) {
+            applyTheme(savedTheme);
+        }
+
+        // SAVE ON CHANGE
+        themeSelector.addEventListener('change', (e) => {
+            const themeName = e.target.value;
+            applyTheme(themeName);
+            localStorage.setItem('refundApp_theme', themeName); // Save to storage
+        });
+
+
+        // --- AJAX LOGIC ---
+        const inputs = document.querySelectorAll('input, select');
+        document.getElementById('endDate').valueAsDate = new Date();
+
+        inputs.forEach(input => {
+            // Do not attach ajax listener to theme selector
+            if(input.id !== 'themeSelector'){
+                input.addEventListener('input', fetchComputation);
+                input.addEventListener('change', fetchComputation);
+            }
+        });
+
+        function fetchComputation() {
+            const payload = {
+                price: document.getElementById('price').value,
+                totalDays: document.getElementById('totalDays').value,
+                startDate: document.getElementById('startDate').value,
+                endDate: document.getElementById('endDate').value,
+                feeMode: document.getElementById('feeMode').value
+            };
+
+            if (!payload.price || !payload.totalDays || !payload.startDate || !payload.endDate) {
+                document.getElementById('resultCard').classList.add('hidden');
+                return;
+            }
+
+            fetch('https://blazeboost.fun/refcal/compute.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    document.getElementById('refundDisplay').innerText = data.refundFormatted;
+                    document.getElementById('dailyRateDisplay').innerText = data.dailyRateFormatted;
+                    document.getElementById('remainingDisp').innerText = data.remainingDays;
+                    document.getElementById('usedDisp').innerText = data.daysUsed;
+                    document.getElementById('logicExplanation').innerText = data.logicText;
+                    document.getElementById('resultCard').classList.remove('hidden');
+                    closeErrorModal();
+                } else if (data.status === 'error') {
+                    document.getElementById('resultCard').classList.add('hidden');
+                    showErrorModal(data.message, data.fix);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // --- ERROR MODAL LOGIC ---
+        const errorModal = document.getElementById('errorModal');
+        const errorContent = document.getElementById('errorModalContent');
+        let isErrorOpen = false;
+
+        function showErrorModal(title, fix) {
+            if(isErrorOpen) return;
+            document.getElementById('errorTitle').innerText = title;
+            document.getElementById('errorMessage').innerText = "The calculation could not be processed.";
+            document.getElementById('errorFix').innerText = fix || "Please check your inputs.";
+            
+            errorModal.classList.remove('hidden');
+            setTimeout(() => {
+                errorContent.classList.remove('scale-95', 'opacity-0');
+                errorContent.classList.add('scale-100', 'opacity-100');
+            }, 10);
+            isErrorOpen = true;
+        }
+
+        function closeErrorModal() {
+            errorContent.classList.remove('scale-100', 'opacity-100');
+            errorContent.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                errorModal.classList.add('hidden');
+                isErrorOpen = false;
+            }, 200);
+        }
+
+        // --- COMMUNITY MODAL LOGIC ---
+        const commModal = document.getElementById('communityModal');
+        const commContent = document.getElementById('communityModalContent');
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const lastSeen = localStorage.getItem('refundApp_community_seen');
+            const now = Date.now();
+            const oneDay = 24 * 60 * 60 * 1000;
+
+            if (!lastSeen || (now - lastSeen > oneDay)) {
+                setTimeout(showCommunity, 1000); 
+            }
+        });
+
+        function showCommunity() {
+            commModal.classList.remove('hidden');
+            setTimeout(() => {
+                commContent.classList.remove('scale-95', 'opacity-0');
+                commContent.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function dismissCommunity(dontShowAgain) {
+            commContent.classList.remove('scale-100', 'opacity-100');
+            commContent.classList.add('scale-95', 'opacity-0');
+            
+            setTimeout(() => {
+                commModal.classList.add('hidden');
+            }, 200);
+
+            if (dontShowAgain) {
+                localStorage.setItem('refundApp_community_seen', Date.now());
+            }
+        }
+    </script>
+</body>
+</html>
